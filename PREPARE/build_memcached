@@ -1,0 +1,32 @@
+#!/usr/bin/ansible-playbook -i localhost,
+---
+- name: Create memcached rpm from source
+  hosts: all
+  gather_facts: False
+  connection: local
+  vars:
+    - memcached_version: '1.4.24'
+    - build_dir: '/vagrant/rpmbuild'
+  tasks:
+    - name: Fetch memcached sources
+      get_url:
+        dest: '{{ build_dir }}/SOURCES/memcached-{{ memcached_version }}.tar.gz'
+        url: 'https://github.com/memcached/memcached/archive/{{ memcached_version }}.tar.gz'
+      tags: fetch
+
+    - name: Run RPM build
+      command: rpmbuild -ba --clean SPECS/memcached.spec
+      args:
+        chdir: '{{ build_dir }}'
+      tags: build
+
+    - name: List Builded RPMs
+      debug: msg="Built RPM {{ item | basename }}"
+      with_fileglob:
+        - '{{ build_dir }}/RPMS/x86_64/memcached*.rpm'
+
+    - name: Cleanup sources
+      file:
+        path: '{{ build_dir }}/SOURCES/memcached-{{ memcached_version }}.tar.gz'
+        state: absent
+      tags: cleanup

@@ -1,0 +1,47 @@
+#!/usr/bin/ansible-playbook -i localhost,
+---
+- name: Create haproxy rpm from source
+  hosts: all
+  gather_facts: False
+  connection: local
+  vars:
+    - haproxy_version: '1.5.14'
+    - build_dir: '/vagrant/rpmbuild'
+  tasks:
+    - name: Fetch haproxy sources
+      get_url:
+        dest: '{{ build_dir }}/SOURCES/haproxy-{{ haproxy_version }}.tar.gz'
+        url: 'http://www.haproxy.org/download/1.5/src/haproxy-{{ haproxy_version }}.tar.gz'
+      tags: fetch
+
+    - name: Copy Build Files to Sources
+      copy:
+        dest: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        src: '{{ item }}'
+      with_fileglob:
+        - files/haproxy/*
+
+    - name: Run RPM build
+      command: rpmbuild -ba --clean SPECS/haproxy.spec
+      args:
+        chdir: '{{ build_dir }}'
+      tags: build
+
+    - name: List Builded RPMs
+      debug: msg="Built RPM {{ item | basename }}"
+      with_fileglob:
+        - '{{ build_dir }}/RPMS/x86_64/haproxy*.rpm'
+
+    - name: Cleanup sources
+      file:
+        path: '{{ build_dir }}/SOURCES/haproxy-{{ haproxy_version }}.tar.gz'
+        state: absent
+      tags: cleanup
+
+    - name: Cleanup Additional files
+      file:
+        path: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        state: absent
+      with_fileglob:
+        - files/haproxy/*
+      tags: cleanup

@@ -1,0 +1,20 @@
+#!/usr/bin/ansible-playbook -i localhost,
+---
+- name: Create nginx rpm from source
+  hosts: all
+  gather_facts: False
+  connection: local
+  sudo: yes
+  vars:
+      - packages: [ 'pcre', 'pcre-devel', 'openssl-devel', 'popt-devel', 'libevent', 'libevent-devel',
+                    'libedit', 'libedit-devel', 'readline-devel', 'readline', 'pam-devel', 'lua', 'lua-devel',
+                    'perl-ExtUtils-Embed', 'cyrus-sasl-devel', 'python-devel',
+                    'python-setuptools', 'python-setuptools-devel' ]
+  tasks:
+    - name: Install Development group
+      yum: name="@Development tools" state=present
+
+    - name: Install Build requirments
+      yum: name={{ item }} state=present
+      with_items:
+        - packages

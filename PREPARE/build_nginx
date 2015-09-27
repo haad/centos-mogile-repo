@@ -1,0 +1,65 @@
+#!/usr/bin/ansible-playbook -i localhost,
+---
+- name: Create nginx rpm from source
+  hosts: all
+  gather_facts: False
+  connection: local
+  vars:
+    - nginx_version: '1.8.0'
+    - build_dir: '/vagrant/rpmbuild'
+  tasks:
+    - name: Fetch nginx sources
+      get_url:
+        dest: '{{ build_dir }}/SOURCES/nginx-{{ nginx_version }}.tar.gz'
+        url: 'http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz'
+      tags: fetch
+
+    - name: Fetch required modules
+      get_url:
+        dest: '{{ build_dir }}/SOURCES/{{ item.name }}.tar.gz'
+        url: '{{ item.url }}'
+      with_items:
+        - {name: 'memc-nginx-module-0.16', url: 'https://github.com/openresty/memc-nginx-module/archive/v0.16.tar.gz'}
+        - {name: 'srcache-nginx-module-0.30', url: 'https://github.com/openresty/srcache-nginx-module/archive/v0.30.tar.gz'}
+        - {name: 'headers-more-nginx-module-0.261', url: 'https://github.com/openresty/headers-more-nginx-module/archive/v0.261.tar.gz'}
+        - {name: 'echo-nginx-module-0.58', url: 'https://github.com/openresty/echo-nginx-module/archive/v0.58.tar.gz'}
+        - {name: 'lua-upstream-nginx-module-0.03', url: 'https://github.com/openresty/lua-upstream-nginx-module/archive/v0.03.tar.gz'}
+        - {name: 'lua-nginx-module-0.9.16', url: 'https://github.com/openresty/lua-nginx-module/archive/v0.9.16.tar.gz'}
+        - {name: 'ngx-fancyindex-0.3.5', url: 'https://github.com/aperezdc/ngx-fancyindex/archive/v0.3.5.tar.gz'}
+        - {name: 'nginx-mogilefs-module-1.0.4', url: 'https://github.com/vkholodkov/nginx-mogilefs-module/archive/1.0.4.tar.gz'}
+        - {name: 'psol-1.9.32.6', url: 'https://dl.google.com/dl/page-speed/psol/1.9.32.6.tar.gz'}
+        - {name: 'ngx_pagespeed-1.9.32.6-beta', url: 'https://github.com/pagespeed/ngx_pagespeed/archive/v1.9.32.6-beta.tar.gz'}
+      tags: fetch
+
+    - name: Copy Build Files to Sources
+      copy:
+        dest: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        src: '{{ item }}'
+      with_fileglob:
+        - files/nginx/*
+      tags: fetch
+
+    - name: Run RPM build
+      command: rpmbuild -ba --clean SPECS/nginx.spec
+      args:
+        chdir: '{{ build_dir }}'
+      tags: build
+
+    - name: List Builded RPMs
+      debug: msg="Built RPM {{ item | basename }}"
+      with_fileglob:
+        - '{{ build_dir }}/RPMS/x86_64/nginx*.rpm'
+
+    - name: Cleanup sources
+      file:
+        path: '{{ build_dir }}/SOURCES/nginx-{{ nginx_version }}.tar.gz'
+        state: absent
+      tags: cleanup
+
+    - name: Cleanup Additional files
+      file:
+        path: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        state: absent
+      with_fileglob:
+        - files/nginx/*
+      tags: cleanup
