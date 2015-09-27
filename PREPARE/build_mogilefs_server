@@ -1,0 +1,60 @@
+#!/usr/bin/ansible-playbook -i localhost,
+
+#
+# wget http://search.cpan.org/CPAN/authors/id/J/JH/JHI/BSD-Resource-1.2907.tar.gz -O SOURCES/BSD-Resource-1.2907.tar.gz
+# wget http://search.cpan.org/CPAN/authors/id/D/DO/DORMANDO/Perlbal-1.80.tar.gz -O SOURCES/Perlbal-1.80.tar.gz
+# wget http://search.cpan.org/CPAN/authors/id/B/BR/BRADFITZ/Sys-Syscall-0.25.tar.gz -O SOURCES/Sys-Syscall-0.25.tar.gz
+# wget http://search.cpan.org/CPAN/authors/id/M/ML/MLEHMANN/IO-AIO-4.32.tar.gz -O SOURCES/IO-AIO-4.32.tar.gz
+# wget http://search.cpan.org/CPAN/authors/id/M/ML/MLEHMANN/common-sense-3.74.tar.gz -O SOURCES/common-sense-3.74.tar.gz
+# wget http://search.cpan.org/CPAN/authors/id/M/MU/MUIR/modules/Net-Netmask-1.9015.tar.gz -O SOURCES/Net-Netmask-1.9015.tar.gz
+#
+#
+
+
+
+---
+- name: Create mogilefs rpm from source
+  hosts: all
+  gather_facts: False
+  connection: local
+  vars:
+    - mogilefs_server_version: '2.72'
+    - build_dir: '/vagrant/rpmbuild'
+  tasks:
+    - name: Fetch mogilefs sources
+      get_url:
+        dest: '{{ build_dir }}/SOURCES/MogileFS-Server-{{ mogilefs_server_version }}.tar.gz'
+        url: 'https://github.com/mogilefs/MogileFS-Server/archive/{{ mogilefs_server_version }}.tar.gz'
+      tags: fetch
+
+    - name: Copy Build Files to Sources
+      copy:
+        dest: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        src: '{{ item }}'
+      with_fileglob:
+        - files/mogilefs/*
+
+    - name: Run RPM build
+      command: rpmbuild -ba --clean SPECS/perl-MogileFs-Server.spec
+      args:
+        chdir: '{{ build_dir }}'
+      tags: build
+
+    - name: List Builded RPMs
+      debug: msg="Built RPM {{ item | basename }}"
+      with_fileglob:
+        - '{{ build_dir }}/RPMS/noarch/perl-MogileFS*.rpm'
+
+    - name: Cleanup sources
+      file:
+        path: '{{ build_dir }}/SOURCES/mogilefs-{{ mogilefs_server_version }}.tar.gz'
+        state: absent
+      tags: cleanup
+
+    - name: Cleanup Additional files
+      file:
+        path: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        state: absent
+      with_fileglob:
+        - files/mogilefs/*
+      tags: cleanup

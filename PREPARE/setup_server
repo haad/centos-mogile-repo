@@ -8,8 +8,10 @@
   vars:
       - packages: [ 'pcre', 'pcre-devel', 'openssl-devel', 'popt-devel', 'libevent', 'libevent-devel',
                     'libedit', 'libedit-devel', 'readline-devel', 'readline', 'pam-devel', 'lua', 'lua-devel',
-                    'perl-ExtUtils-Embed', 'cyrus-sasl-devel', 'python-devel',
-                    'python-setuptools', 'python-setuptools-devel' ]
+                    'perl-ExtUtils-Embed', 'cyrus-sasl-devel', 'python-devel', 'python-setuptools',
+                    'python-setuptools-devel', 'perl-IO-stringy', 'perl-IO-Zlib', 'perl-IO-Compress-Base',
+                    'perl-IO-Compress-Zlib', 'perl-IO-Compress-Bzip2', 'perl-Time-HiRes', 'perl-Test-Base',
+                    'perl-DBI', 'perl-DBD-MySQL', 'perl-DBD-Pg' ]
   tasks:
     - name: Install Development group
       yum: name="@Development tools" state=present

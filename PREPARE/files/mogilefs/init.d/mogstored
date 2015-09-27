@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# mogstored  This shell script controls the MogileFS storage daemon
+#
+# Author:       Ruben Kerkhof <ruben@rubenkerkhof.com>
+#
+# chkconfig:    - 97 03
+#
+# description:  MogileFS is a distributed storage system
+# processname:  mogstored
+# config: /etc/mogilefs/mogstored.conf
+#
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+if [ -f /etc/sysconfig/mogstored ]; then
+        . /etc/sysconfig/mogstored
+fi
+
+docroot=${MOGILE_DIR-/var/mogdata}
+
+RETVAL=0
+
+start() {
+	echo -n $"Starting MogileFS Storage daemon: "
+	daemon --user mogstored /opt/MogileFS/bin/mogstored --daemon --docroot=${docroot}
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/mogstored
+}
+
+stop() {
+	echo -n $"Stopping MogileFS Storage daemon: "
+	killproc mogstored
+	echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/mogstored
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|force-reload|reload)
+	restart
+	;;
+  condrestart)
+	[ -f /var/lock/subsys/mogstored ] && restart
+	;;
+  status)
+	status mogstored
+	RETVAL=$?
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+	exit 1
+esac
+
+exit $RETVAL
