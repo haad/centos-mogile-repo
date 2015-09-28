@@ -1,12 +1,12 @@
 #!/usr/bin/ansible-playbook -i localhost,
 
 #
-# wget http://search.cpan.org/CPAN/authors/id/J/JH/JHI/BSD-Resource-1.2907.tar.gz -O SOURCES/BSD-Resource-1.2907.tar.gz
-# wget http://search.cpan.org/CPAN/authors/id/D/DO/DORMANDO/Perlbal-1.80.tar.gz -O SOURCES/Perlbal-1.80.tar.gz
-# wget http://search.cpan.org/CPAN/authors/id/B/BR/BRADFITZ/Sys-Syscall-0.25.tar.gz -O SOURCES/Sys-Syscall-0.25.tar.gz
-# wget http://search.cpan.org/CPAN/authors/id/M/ML/MLEHMANN/IO-AIO-4.32.tar.gz -O SOURCES/IO-AIO-4.32.tar.gz
-# wget http://search.cpan.org/CPAN/authors/id/M/ML/MLEHMANN/common-sense-3.74.tar.gz -O SOURCES/common-sense-3.74.tar.gz
-# wget http://search.cpan.org/CPAN/authors/id/M/MU/MUIR/modules/Net-Netmask-1.9015.tar.gz -O SOURCES/Net-Netmask-1.9015.tar.gz
+# wget  -O SOURCES/.tar.gz
+# wget  -O SOURCES/.tar.gz
+# wget  -O SOURCES/.tar.gz
+# wget  -O SOURCES/.tar.gz
+# wget  -O SOURCES/.tar.gz
+# wget  -O SOURCES/.tar.gz
 #
 #
 
@@ -20,11 +20,27 @@
   vars:
     - mogilefs_server_version: '2.72'
     - build_dir: '/vagrant/rpmbuild'
+    - perl_cpan_urls:
+      - {name: 'BSD-Resource-1.2907', url: 'http://search.cpan.org/CPAN/authors/id/J/JH/JHI'}
+      - {name: 'Perlbal-1.80', url: 'http://search.cpan.org/CPAN/authors/id/D/DO/DORMANDO'}
+      - {name: 'Sys-Syscall-0.25', url: 'http://search.cpan.org/CPAN/authors/id/B/BR/BRADFITZ'}
+      - {name: 'IO-AIO-4.32', url: 'http://search.cpan.org/CPAN/authors/id/M/ML/MLEHMANN'}
+      - {name: 'common-sense-3.74', url: 'http://search.cpan.org/CPAN/authors/id/M/ML/MLEHMANN'}
+      - {name: 'Net-Netmask-1.9015', url: 'http://search.cpan.org/CPAN/authors/id/M/MU/MUIR/modules'}
+      - {name: 'Danga-Socket-1.61', url: 'http://www.cpan.org/modules/by-module/Danga'}
+
+
   tasks:
     - name: Fetch mogilefs sources
       get_url:
         dest: '{{ build_dir }}/SOURCES/MogileFS-Server-{{ mogilefs_server_version }}.tar.gz'
         url: 'https://github.com/mogilefs/MogileFS-Server/archive/{{ mogilefs_server_version }}.tar.gz'
+      tags: fetch
+
+    - name: Fetch mogilefs sources
+      get_url:
+        dest: '{{ build_dir }}/SOURCES/{{ item.name }}.tar.gz'
+        url: '{{ item.url }}/{{ item.name }}.tar.gz'
       tags: fetch
 
     - name: Copy Build Files to Sources
@@ -33,6 +49,21 @@
         src: '{{ item }}'
       with_fileglob:
         - files/mogilefs/*
+      tags: fetch
+
+    - name: Build RPM for perl packages
+      command: rpmbuild -ba --clean SPECS/{{ item }}
+      args:
+        chdir: '{{ build_dir }}'
+      with_items:
+        - perl-BSD-Resource.spec
+        - perl-common-sense.spec
+        - perl-Net-Netmask.spec
+        - perl-Sys-Syscall.spec
+        - perl-IO-AIO.spec          ## This has dependency on rpms above.
+        - perl-Danga-Socket.spec
+        - Perlbal.spec
+      tags: build
 
     - name: Run RPM build
       command: rpmbuild -ba --clean SPECS/perl-MogileFs-Server.spec
