@@ -1,17 +1,5 @@
 #!/usr/bin/ansible-playbook -i localhost,
 
-#
-# wget  -O SOURCES/.tar.gz
-# wget  -O SOURCES/.tar.gz
-# wget  -O SOURCES/.tar.gz
-# wget  -O SOURCES/.tar.gz
-# wget  -O SOURCES/.tar.gz
-# wget  -O SOURCES/.tar.gz
-#
-#
-
-
-
 ---
 - name: Create mogilefs rpm from source
   hosts: all

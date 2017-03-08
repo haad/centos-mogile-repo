@@ -5,19 +5,19 @@
   gather_facts: False
   connection: local
   vars:
-    - nginx_version: '1.8.0'
+    - nginx_version: '1.11.10'
     - build_dir: '/vagrant/rpmbuild'
     - nginx_modules:
-        - {name: 'memc-nginx-module-0.16', url: 'https://github.com/openresty/memc-nginx-module/archive/v0.16.tar.gz'}
-        - {name: 'srcache-nginx-module-0.30', url: 'https://github.com/openresty/srcache-nginx-module/archive/v0.30.tar.gz'}
-        - {name: 'headers-more-nginx-module-0.261', url: 'https://github.com/openresty/headers-more-nginx-module/archive/v0.261.tar.gz'}
-        - {name: 'echo-nginx-module-0.58', url: 'https://github.com/openresty/echo-nginx-module/archive/v0.58.tar.gz'}
-        - {name: 'lua-upstream-nginx-module-0.03', url: 'https://github.com/openresty/lua-upstream-nginx-module/archive/v0.03.tar.gz'}
-        - {name: 'lua-nginx-module-0.9.16', url: 'https://github.com/openresty/lua-nginx-module/archive/v0.9.16.tar.gz'}
-        - {name: 'ngx-fancyindex-0.3.5', url: 'https://github.com/aperezdc/ngx-fancyindex/archive/v0.3.5.tar.gz'}
+        - {name: 'memc-nginx-module-0.17', url: 'https://github.com/openresty/memc-nginx-module/archive/v0.17.tar.gz'}
+        - {name: 'srcache-nginx-module-0.31', url: 'https://github.com/openresty/srcache-nginx-module/archive/v0.31.tar.gz'}
+        - {name: 'headers-more-nginx-module-0.32', url: 'https://github.com/openresty/headers-more-nginx-module/archive/v0.32.tar.gz'}
+        - {name: 'echo-nginx-module-0.60', url: 'https://github.com/openresty/echo-nginx-module/archive/v0.60.tar.gz'}
+        - {name: 'lua-upstream-nginx-module-0.06', url: 'https://github.com/openresty/lua-upstream-nginx-module/archive/v0.06.tar.gz'}
+        - {name: 'lua-nginx-module-0.10.7', url: 'https://github.com/openresty/lua-nginx-module/archive/v0.10.7.tar.gz'}
+        - {name: 'ngx-fancyindex-0.4.1', url: 'https://github.com/aperezdc/ngx-fancyindex/archive/v0.4.1.tar.gz'}
         - {name: 'nginx-mogilefs-module-1.0.4', url: 'https://github.com/vkholodkov/nginx-mogilefs-module/archive/1.0.4.tar.gz'}
-        - {name: 'psol-1.9.32.6', url: 'https://dl.google.com/dl/page-speed/psol/1.9.32.6.tar.gz'}
-        - {name: 'ngx_pagespeed-1.9.32.6-beta', url: 'https://github.com/pagespeed/ngx_pagespeed/archive/v1.9.32.6-beta.tar.gz'}
+        - {name: 'psol-1.9.32.10', url: 'https://dl.google.com/dl/page-speed/psol/1.9.32.10.tar.gz'}
+        - {name: 'ngx_pagespeed-1.9.32.10-beta', url: 'https://github.com/pagespeed/ngx_pagespeed/archive/v1.9.32.10-beta.tar.gz'}
 
   tasks:
     - name: Fetch nginx sources

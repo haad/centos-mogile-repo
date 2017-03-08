@@ -5,13 +5,13 @@
   gather_facts: False
   connection: local
   vars:
-    - haproxy_version: '1.5.14'
+    - haproxy_version: '1.7.3'
     - build_dir: '/vagrant/rpmbuild'
   tasks:
     - name: Fetch haproxy sources
       get_url:
         dest: '{{ build_dir }}/SOURCES/haproxy-{{ haproxy_version }}.tar.gz'
-        url: 'http://www.haproxy.org/download/1.5/src/haproxy-{{ haproxy_version }}.tar.gz'
+        url: 'http://www.haproxy.org/download/1.7/src/haproxy-{{ haproxy_version }}.tar.gz'
       tags: fetch
 
     - name: Copy Build Files to Sources

@@ -5,7 +5,7 @@
   gather_facts: False
   connection: local
   vars:
-    - memcached_version: '1.4.24'
+    - memcached_version: '1.4.35'
     - build_dir: '/vagrant/rpmbuild'
   tasks:
     - name: Fetch memcached sources
