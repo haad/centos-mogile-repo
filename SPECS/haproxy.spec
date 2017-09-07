@@ -6,7 +6,7 @@
 %define haproxy_confdir %{_sysconfdir}/haproxy
 %define haproxy_datadir %{_datadir}/haproxy
 
-%define version 1.5.14
+%define version 1.6.2
 #%define dev_rel dev25
 #%define release 1
 
@@ -52,7 +52,7 @@ possibility not to expose fragile web servers to the net.
 %ifarch %ix86 x86_64
 use_regparm="USE_REGPARM=1"
 %endif
-
+# USE_LUA requires lua 5.3
 make %{?_smp_mflags} CPU="generic" TARGET="linux26" USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 ${use_regparm}
 
 pushd contrib/halog
@@ -102,13 +102,8 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc CHANGELOG LICENSE README doc/*
-%doc examples/url-switching.cfg
-%doc examples/acl-content-sw.cfg
-%doc examples/content-sw-sample.cfg
-%doc examples/cttproxy-src.cfg
-%doc examples/haproxy.cfg
-%doc examples/tarpit.cfg
+%doc CHANGELOG LICENSE README doc/* examples/*
+
 %{haproxy_datadir}
 %dir %{haproxy_confdir}
 %config(noreplace) %{haproxy_confdir}/%{name}.cfg
@@ -118,9 +113,12 @@ fi
 %{_bindir}/halog
 %{_mandir}/man1/%{name}.1.gz
 %attr(-,%{haproxy_user},%{haproxy_group}) %dir %{haproxy_home}
-%exclude %{_sbindir}/haproxy-systemd-wrapper
 
 %changelog
+* Wed Aug 20 2015 Adam Hamsik <haaaad@gmail.com> - 1.6.2
+- Update to haproxy 1.6.2
+- Add %{dist} to Release
+
 * Wed Aug 20 2015 Adam Hamsik <haaaad@gmail.com> - 1.5.14
 - Update to haproxy 1.5.14
 - Add %{dist} to Release

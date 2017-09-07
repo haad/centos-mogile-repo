@@ -15,7 +15,7 @@
 
 Summary: Distributed memory object caching system
 Name: memcached
-Version: 1.4.24
+Version: 1.4.36
 Release: 1%{?dist}
 License: BSD
 Group: System Environment/Daemons

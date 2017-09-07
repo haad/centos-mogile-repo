@@ -5,28 +5,28 @@
   gather_facts: False
   connection: local
   vars:
-    - memcached_version: '1.4.35'
-    - build_dir: '/vagrant/rpmbuild'
+    - memcached_version: 1.4.36
+    - build_dir: /vagrant/rpmbuild
   tasks:
     - name: Fetch memcached sources
       get_url:
-        dest: '{{ build_dir }}/SOURCES/memcached-{{ memcached_version }}.tar.gz'
-        url: 'https://github.com/memcached/memcached/archive/{{ memcached_version }}.tar.gz'
+        dest: "{{ build_dir }}/SOURCES/memcached-{{ memcached_version }}.tar.gz"
+        url: "https://github.com/memcached/memcached/archive/{{ memcached_version }}.tar.gz"
       tags: fetch
 
     - name: Run RPM build
-      command: rpmbuild -ba --clean SPECS/memcached.spec
+      command: 'rpmbuild -ba --clean --buildroot=/tmp/rpmbuild --define "_topdir {{ build_dir }}" SPECS/memcached.spec'
       args:
-        chdir: '{{ build_dir }}'
+        chdir: "{{ build_dir }}"
       tags: build
 
     - name: List Builded RPMs
       debug: msg="Built RPM {{ item | basename }}"
       with_fileglob:
-        - '{{ build_dir }}/RPMS/x86_64/memcached*.rpm'
+        - "{{ build_dir }}/RPMS/x86_64/memcached*.rpm"
 
     - name: Cleanup sources
       file:
-        path: '{{ build_dir }}/SOURCES/memcached-{{ memcached_version }}.tar.gz'
+        path: "{{ build_dir }}/SOURCES/memcached-{{ memcached_version }}.tar.gz"
         state: absent
       tags: cleanup

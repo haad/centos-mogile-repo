@@ -5,79 +5,84 @@
   gather_facts: False
   connection: local
   vars:
-    - nginx_version: '1.11.10'
-    - build_dir: '/vagrant/rpmbuild'
+    - nginx_version: 1.11.13
+    - build_dir: /vagrant/rpmbuild
     - nginx_modules:
-        - {name: 'memc-nginx-module-0.17', url: 'https://github.com/openresty/memc-nginx-module/archive/v0.17.tar.gz'}
-        - {name: 'srcache-nginx-module-0.31', url: 'https://github.com/openresty/srcache-nginx-module/archive/v0.31.tar.gz'}
-        - {name: 'headers-more-nginx-module-0.32', url: 'https://github.com/openresty/headers-more-nginx-module/archive/v0.32.tar.gz'}
-        - {name: 'echo-nginx-module-0.60', url: 'https://github.com/openresty/echo-nginx-module/archive/v0.60.tar.gz'}
-        - {name: 'lua-upstream-nginx-module-0.06', url: 'https://github.com/openresty/lua-upstream-nginx-module/archive/v0.06.tar.gz'}
-        - {name: 'lua-nginx-module-0.10.7', url: 'https://github.com/openresty/lua-nginx-module/archive/v0.10.7.tar.gz'}
-        - {name: 'ngx-fancyindex-0.4.1', url: 'https://github.com/aperezdc/ngx-fancyindex/archive/v0.4.1.tar.gz'}
-        - {name: 'nginx-mogilefs-module-1.0.4', url: 'https://github.com/vkholodkov/nginx-mogilefs-module/archive/1.0.4.tar.gz'}
-        - {name: 'psol-1.9.32.10', url: 'https://dl.google.com/dl/page-speed/psol/1.9.32.10.tar.gz'}
-        - {name: 'ngx_pagespeed-1.9.32.10-beta', url: 'https://github.com/pagespeed/ngx_pagespeed/archive/v1.9.32.10-beta.tar.gz'}
+        - name: memc-nginx-module-0.18
+          url: https://github.com/openresty/memc-nginx-module/archive/v0.18.tar.gz
+        - name: srcache-nginx-module-0.31
+          url: https://github.com/openresty/srcache-nginx-module/archive/v0.31.tar.gz
+        - name: headers-more-nginx-module-0.32
+          url: https://github.com/openresty/headers-more-nginx-module/archive/v0.32.tar.gz
+        - name: echo-nginx-module-0.60
+          url: https://github.com/openresty/echo-nginx-module/archive/v0.60.tar.gz
+        - name: lua-upstream-nginx-module-0.06
+          url: https://github.com/openresty/lua-upstream-nginx-module/archive/v0.06.tar.gz
+        - name: lua-nginx-module-0.10.8
+          url: https://github.com/openresty/lua-nginx-module/archive/v0.10.8.tar.gz
+        - name: ngx-fancyindex-0.4.1
+          url: https://github.com/aperezdc/ngx-fancyindex/archive/v0.4.1.tar.gz
+        - name: nginx-mogilefs-module-1.0.4
+          url: https://github.com/vkholodkov/nginx-mogilefs-module/archive/1.0.4.tar.gz
+        - name: psol-1.11.33.4
+          url: https://dl.google.com/dl/page-speed/psol/1.11.33.4.tar.gz
+        - name: ngx_pagespeed-1.11.33.4-beta
+          url: https://github.com/pagespeed/ngx_pagespeed/archive/v1.11.33.4-beta.tar.gz
 
   tasks:
     - name: Fetch nginx sources
       get_url:
-        dest: '{{ build_dir }}/SOURCES/nginx-{{ nginx_version }}.tar.gz'
-        url: 'http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz'
+        dest: "{{ build_dir }}/SOURCES/nginx-{{ nginx_version }}.tar.gz"
+        url: "http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz"
       tags: fetch
 
     - name: Fetch required modules
       get_url:
-        dest: '{{ build_dir }}/SOURCES/{{ item.name }}.tar.gz'
-        url: '{{ item.url }}'
+        dest: "{{ build_dir }}/SOURCES/{{ item.name }}.tar.gz"
+        url: "{{ item.url }}"
       with_items:
-        nginx_modules
+        - "{{ nginx_modules }}"
       tags: fetch
 
     - name: Copy Build Files to Sources
       copy:
-        dest: '{{ build_dir }}/SOURCES/{{ item | basename }}'
-        src: '{{ item }}'
+        dest: "{{ build_dir }}/SOURCES/{{ item | basename }}"
+        src: "{{ item }}"
       with_fileglob:
         - files/nginx/*
       tags: fetch
 
     - name: Run RPM build
-      command: rpmbuild -ba --clean SPECS/nginx.spec
+      command: 'rpmbuild -ba --clean --buildroot=/tmp/rpmbuild --define "_topdir {{ build_dir }}" SPECS/nginx.spec'
       args:
-        chdir: '{{ build_dir }}'
+        chdir: "{{ build_dir }}"
       tags: build
 
     - name: List Builded RPMs
       debug: msg="Built RPM {{ item | basename }}"
       with_fileglob:
-        - '{{ build_dir }}/RPMS/x86_64/nginx*.rpm'
+        - "{{ build_dir }}/RPMS/x86_64/nginx*.rpm"
 
     - name: Cleanup sources
       file:
-        path: '{{ build_dir }}/SOURCES/nginx-{{ nginx_version }}.tar.gz'
-        state: absent
-      tags: cleanup
-
-    - name: Cleanup sources
-      file:
-        path: '{{ build_dir }}/SOURCES/{{ item.name }}.tar.gz'
+        path: "{{ build_dir }}/SOURCES/{{ item.name }}.tar.gz"
         state: absent
       with_items:
-        nginx_modules
+        - "{{ nginx_modules }}"
+        - "nginx-{{ nginx_version }}"
       tags: cleanup
 
     - name: Cleanup BUILD
       file:
-        path: '{{ build_dir }}/BUILD/{{ item.name }}'
+        path: "{{ build_dir }}/BUILD/{{ item.name }}"
         state: absent
       with_items:
-        nginx_modules
+        - "{{ nginx_modules }}"
       tags: cleanup
 
     - name: Cleanup Additional files
       file:
-        path: '{{ build_dir }}/SOURCES/{{ item | basename }}'
+        path: "{{ build_dir }}/SOURCES/{{ item | basename }}"
         state: absent
       with_fileglob:
         - files/nginx/*

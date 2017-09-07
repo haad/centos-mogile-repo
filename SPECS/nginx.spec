@@ -23,7 +23,6 @@ Requires: initscripts >= 8.36
 Requires(post): chkconfig
 Requires: openssl >= 1.0.1
 BuildRequires: openssl-devel >= 1.0.1
-%define with_spdy 1
 %endif
 
 %if 0%{?rhel}  == 7
@@ -34,7 +33,6 @@ Requires: openssl >= 1.0.1
 BuildRequires: systemd
 BuildRequires: openssl-devel >= 1.0.1
 Epoch: 1
-%define with_spdy 1
 %endif
 
 %if 0%{?suse_version} == 1110
@@ -50,7 +48,6 @@ BuildRequires: libopenssl-devel
 BuildRequires: systemd
 Requires(pre): shadow
 Requires: systemd
-%define with_spdy 1
 %define nginx_loggroup trusted
 %endif
 
@@ -58,22 +55,22 @@ Requires: systemd
 
 Summary: High performance web server
 Name: nginx
-Version: 1.8.0
+Version: 1.11.13
 Release: 1%{?dist}.ngx
 Vendor: nginx inc.
 URL: http://nginx.org/
 
 Source0: http://nginx.org/download/%{name}-%{version}.tar.gz
-Source1: memc-nginx-module-0.16.tar.gz
-Source2: srcache-nginx-module-0.30.tar.gz
-Source3: headers-more-nginx-module-0.261.tar.gz
-Source4: echo-nginx-module-0.58.tar.gz
-Source5: lua-upstream-nginx-module-0.03.tar.gz
-Source6: lua-nginx-module-0.9.16.tar.gz
-Source8: ngx-fancyindex-0.3.5.tar.gz
-Source9: nginx-mogilefs-module-1.0.4.tar.gz
-Source10: ngx_pagespeed-1.9.32.6-beta.tar.gz
-Source11: psol-1.9.32.6.tar.gz
+Source1: memc-nginx-module-0.18.tar.gz
+Source2: srcache-nginx-module-0.31.tar.gz
+Source3: headers-more-nginx-module-0.32.tar.gz
+Source4: ngx-fancyindex-0.4.1.tar.gz
+Source5: nginx-mogilefs-module-1.0.4.tar.gz
+#Source6: echo-nginx-module-0.60.tar.gz
+#Source7: lua-upstream-nginx-module-0.06.tar.gz
+#Source8: lua-nginx-module-0.10.8.tar.gz
+#Source10: ngx_pagespeed-1.11.33.4-beta.tar.gz
+#Source11: psol-1.11.33.4.tar.gz
 Source101: logrotate
 Source102: nginx.init
 Source103: nginx.sysconf
@@ -115,10 +112,10 @@ Not stripped version of nginx built with the debugging log support.
 %define MOD3 $(basename %SOURCE3 .tar.gz)
 %define MOD4 $(basename %SOURCE4 .tar.gz)
 %define MOD5 $(basename %SOURCE5 .tar.gz)
-%define MOD6 $(basename %SOURCE6 .tar.gz)
-%define MOD8 $(basename %SOURCE8 .tar.gz)
-%define MOD9 $(basename %SOURCE9 .tar.gz)
-%define MOD10 $(basename %SOURCE10 .tar.gz)
+#%define MOD6 $(basename %SOURCE6 .tar.gz)
+#%define MOD8 $(basename %SOURCE8 .tar.gz)
+#%define MOD9 $(basename %SOURCE9 .tar.gz)
+#%define MOD10 $(basename %SOURCE10 .tar.gz)
 
 %prep
 %setup -q
@@ -127,12 +124,12 @@ Not stripped version of nginx built with the debugging log support.
 %setup -T -D -b 3
 %setup -T -D -b 4
 %setup -T -D -b 5
-%setup -T -D -b 6
-%setup -T -D -b 8
-%setup -T -D -b 9
-%setup -T -D -b 10
+#%setup -T -D -b 6
+#%setup -T -D -b 8
+#%setup -T -D -b 9
+#%setup -T -D -b 10
 
-tar -xvzf %{SOURCE11} -C %{_builddir}/%{MOD10}
+#tar -xvzf %{SOURCE11} -C %{_builddir}/%{MOD10}
 
 %build
 ./configure \
@@ -174,11 +171,6 @@ tar -xvzf %{SOURCE11} -C %{_builddir}/%{MOD10}
         --add-module=%{_builddir}/%{MOD3} \
         --add-module=%{_builddir}/%{MOD4} \
         --add-module=%{_builddir}/%{MOD5} \
-        --add-module=%{_builddir}/%{MOD6} \
-        --add-module=%{_builddir}/%{MOD8} \
-        --add-module=%{_builddir}/%{MOD9} \
-        --add-module=%{_builddir}/%{MOD10} \
-        %{?with_spdy:--with-http_spdy_module} \
         --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
         $*
 make %{?_smp_mflags}
@@ -222,11 +214,6 @@ make %{?_smp_mflags}
         --add-module=%{_builddir}/%{MOD3} \
         --add-module=%{_builddir}/%{MOD4} \
         --add-module=%{_builddir}/%{MOD5} \
-        --add-module=%{_builddir}/%{MOD6} \
-        --add-module=%{_builddir}/%{MOD8} \
-        --add-module=%{_builddir}/%{MOD9} \
-        --add-module=%{_builddir}/%{MOD10} \
-        %{?with_spdy:--with-http_spdy_module} \
         --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
         $*
 make %{?_smp_mflags}
